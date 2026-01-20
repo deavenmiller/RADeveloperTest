@@ -26,8 +26,28 @@ import { deck, users } from './setup.js';
 //   }
 // }
 
-function drawCards(deck, num){
-  return [deck, num];
+function drawCards(deck, num) {
+  // Draw the specified number of cards from the top of the deck
+  const hand = deck.slice(0, num);
+  const remainingDeck = deck.slice(num);
+
+  // Count the remaining cards by suit
+  const remainingSuits = {};
+  remainingDeck.forEach(card => {
+    remainingSuits[card.suit] = (remainingSuits[card.suit] || 0) + 1;
+  });
+
+  // Count the remaining cards by value
+  const remainingValues = {};
+  remainingDeck.forEach(card => {
+    remainingValues[card.value] = (remainingValues[card.value] || 0) + 1;
+  });
+
+  return {
+    hand,
+    remainingSuits,
+    remainingValues
+  };
 }
 
 console.log(drawCards(deck, 5));
@@ -59,7 +79,25 @@ console.log(drawCards(deck, 5));
 // }
 
 function deduplicateUsers(users){
-  return users;
+  const seen = new Set();
+  const returnUsers = [];
+  let dupeCount = 0;
+
+  users.forEach(user => {
+    // Create a unique key for all the user's properties
+    const userKey = JSON.stringify(user);
+    if (seen.has(userKey)) {
+      dupeCount++;
+    } else {
+      seen.add(userKey);
+      returnUsers.push(user);
+    }
+  });
+
+  return {
+    returnUsers,
+    dupeCount
+  }
 }
 
 console.log(deduplicateUsers(users));
@@ -86,3 +124,15 @@ console.log(deduplicateUsers(users));
 //Given that you can control the object schema
 //And given that all user editable fields are limited to numbers and letters
 //NOTE: This question does not have a correct answer, it is a design question to see how you think about the problem
+
+/*
+
+DESIGN ANSWER:
+- Create a concatenated search field:
+  - Add a single field called "searchText" that contains all searchable fields concatenated together.
+  - Concatenate all user-editable fields into the searchText field.
+  - Use a delimiter to separate the fields "|".
+  - Normalize the data: convert to lowercase and remove extra whitespace for consistent searching.
+  - Ex: "eventName|description|location|date|time"
+
+*/
